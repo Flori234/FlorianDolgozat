@@ -1,43 +1,35 @@
 #!/bin/bash
 
-# 1. Parancssori argumentum ellenőrzése
-if [ $# -ne 1 ]; then
-    echo "Hiba: Kérlek, adj meg egy könyvtárnevet argumentumként."
-    exit 1
+if [ -z "$1" ]; then
+echo "Hiba: adj meg egy könyvtárnevet argumentumként!"
+exit 1
 fi
 
-# 2. Ellenőrzés, hogy a mappa létezik-e már
-dir_name=$1
-if [ -d "$dir_name" ]; then
-    echo "A mappa létezik. Törlés előtt megerősítést kérünk."
-    rm -rf "$dir_name" # Töröljük a mappát és annak tartalmát
-    echo "A mappa törölve lett."
+DIRNAME=$1
+
+
+if [ -d "$DIRNAME" ]; then
+echo "A megadott könyvtár már létezik."
 else
-    echo "A mappa nem létezik. Létrehozásra kerül."
+mkdir "$DIRNAME"
+echo "Könyvtár létrehozva: $DIRNAME"
 fi
 
-# 3. Mappa létrehozása
-mkdir "$dir_name"
-echo "A mappa létrehozva: $dir_name"
 
-# 4. Felhasználótól szám kérése
-while true; do
-    read -p "Kérlek, adj meg egy számot 1 és 10 között: " number
-    if [[ "$number" =~ ^[1-9]$|^10$ ]]; then
-        echo "Érvényes szám: $number"
-        break
-    else
-        echo "Hiba: Csak 1 és 10 közötti számot adj meg."
-    fi
+read -p "Hány felhasználót szeretnél létrehozni? (1-10): " USERCOUNT
+
+
+if ! [[ "$USERCOUNT" =~ ^[1-9]$|10$ ]]; then
+echo "Hibás szám! Csak 1 és 10 közötti érték elfogadott."
+exit 2
+fi
+
+
+for i in $(seq 1 $USERCOUNT); do
+FILENAME="$DIRNAME/user$i"
+touch "$FILENAME"
+chmod 600 "$FILENAME"
+echo "$FILENAME létrehozva, csak a tulajdonos olvashatja és írhatja."
 done
 
-# 5. Fájl létrehozása a megadott könyvtárban
-file_name="${dir_name}/user${number}"
-touch "$file_name"
-echo "Fájl létrehozva: $file_name"
-
-# 6. Jogosultságok beállítása
-chmod 600 "$file_name"
-echo "A fájl jogosultságai beállítva, csak a tulajdonos olvashatja és írhatja."
-
-echo "A script sikeresen befejeződött."
+echo "Összes felhasználó fájl sikeresen létrehozva a(z) $DIRNAME könyvtárban."
